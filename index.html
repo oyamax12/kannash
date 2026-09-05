@@ -1,0 +1,1265 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>كناش | دفتر حساباتك</title>
+<meta name="description" content="تطبيق إدارة ديون ومعاملات مالية للمتاجر والتجار الصغار والزبائن">
+
+<!-- PWA: manifest + أيقونات + لون الشريط العلوي -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#173F31">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+<link rel="icon" type="image/png" sizes="48x48" href="icons/favicon.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+
+<!-- دعم إضافة الشاشة الرئيسية على iOS (Safari) -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="كناش">
+<!-- دعم إضافة الشاشة الرئيسية على Android (Chrome) -->
+<meta name="mobile-web-app-capable" content="yes">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Aref+Ruqaa:wght@400;700&family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --cover:#173F31; --cover-dark:#0F2C22; --page:#F3E9D2; --page-dark:#E9DCBB;
+  --ink:#2B2118; --ink-soft:#6B5D4F; --red:#A13D3D; --red-dark:#7E2E2E;
+  --green:#3E7C59; --green-dark:#2E5F44; --gold:#B8935A; --blue:#3B5A78;
+  --line:rgba(43,33,24,0.15); --shadow: 0 10px 30px rgba(15,44,34,0.18);
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{font-family:'Tajawal',sans-serif;background:var(--cover);color:var(--ink);min-height:100vh;}
+.app-shell{max-width:480px;margin:0 auto;min-height:100vh;background:var(--page);
+  background-image: repeating-linear-gradient(180deg, transparent, transparent 34px, var(--line) 35px);
+  position:relative;box-shadow:var(--shadow);display:flex;flex-direction:column;}
+.spine{position:absolute;top:0;right:0;bottom:0;width:14px;
+  background:linear-gradient(180deg,var(--gold),var(--red-dark) 50%, var(--gold));
+  background-size:100% 24px;background-repeat:repeat-y;opacity:0.85;}
+header.cover{background:linear-gradient(160deg,var(--cover),var(--cover-dark));color:var(--page);
+  padding:20px 24px 24px;position:relative;overflow:hidden;}
+header.cover::after{content:"";position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(circle at 80% -10%, rgba(184,147,90,0.25), transparent 60%);}
+.brand-row{display:flex;align-items:center;justify-content:space-between;position:relative;}
+.brand{font-family:'Aref Ruqaa',serif;font-size:28px;font-weight:700;letter-spacing:1px;
+  display:flex;align-items:baseline;gap:8px;}
+.brand span{font-family:'Tajawal',sans-serif;font-size:11px;font-weight:500;color:var(--gold);letter-spacing:2px;}
+.icon-btn{background:rgba(243,233,210,0.1);border:1px solid rgba(184,147,90,0.4);color:var(--page);
+  width:36px;height:36px;border-radius:50%;font-size:16px;cursor:pointer;display:flex;
+  align-items:center;justify-content:center;}
+.header-actions{display:flex;gap:8px;}
+.summary-row{display:flex;gap:10px;margin-top:16px;position:relative;}
+.sum-card{flex:1;background:rgba(243,233,210,0.08);border:1px solid rgba(184,147,90,0.35);
+  border-radius:10px;padding:10px 12px;text-align:center;}
+.sum-card .lbl{font-size:10.5px;color:rgba(243,233,210,0.7);margin-bottom:4px;}
+.sum-card .val{font-size:16px;font-weight:900;}
+.sum-card.owe .val{color:#E8A5A5;} .sum-card.owed .val{color:#9FD6B4;} .sum-card.profit .val{color:var(--gold);}
+.reminder-banner{background:rgba(161,61,61,0.15);border:1px solid var(--red);color:#F3D5D5;
+  border-radius:10px;padding:8px 12px;margin-top:10px;font-size:12px;display:flex;
+  align-items:center;justify-content:space-between;cursor:pointer;}
+nav.tabs{display:flex;background:var(--page-dark);border-bottom:2px solid var(--line);
+  position:sticky;top:0;z-index:10;overflow-x:auto;}
+nav.tabs button{flex:1;min-width:66px;border:none;background:transparent;padding:11px 3px;
+  font-family:'Tajawal',sans-serif;font-size:11.5px;font-weight:700;color:var(--ink-soft);
+  cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap;}
+nav.tabs button.active{color:var(--cover);border-bottom-color:var(--red);}
+main{flex:1;padding:18px 20px 90px;position:relative;}
+.section-title{font-family:'Aref Ruqaa',serif;font-size:19px;font-weight:700;color:var(--cover-dark);
+  margin:4px 0 14px;display:flex;align-items:center;justify-content:space-between;}
+.pill-btn{background:var(--cover);color:var(--page);border:none;border-radius:20px;padding:8px 16px;
+  font-size:13px;font-weight:700;cursor:pointer;font-family:'Tajawal',sans-serif;}
+.pill-btn.red{background:var(--red);} .pill-btn.green{background:var(--green);}
+.pill-btn.ghost{background:transparent;color:var(--cover);border:1.5px solid var(--cover);}
+.pill-btn.small{padding:6px 12px;font-size:11.5px;}
+.contact-card{background:rgba(255,255,255,0.35);border:1px solid var(--line);border-radius:12px;
+  padding:12px 14px;margin-bottom:10px;display:flex;align-items:center;gap:12px;cursor:pointer;}
+.contact-card:active{transform:scale(0.98);}
+.avatar{width:42px;height:42px;border-radius:50%;background:var(--gold);color:var(--cover-dark);
+  display:flex;align-items:center;justify-content:center;font-weight:900;font-size:16px;flex-shrink:0;}
+.contact-info{flex:1;min-width:0;} .contact-info .name{font-weight:700;font-size:15px;}
+.contact-info .phone{font-size:12px;color:var(--ink-soft);}
+.balance-tag{font-weight:900;font-size:13.5px;white-space:nowrap;}
+.balance-tag.owe{color:var(--red);} .balance-tag.zero{color:var(--ink-soft);} .balance-tag.credit{color:var(--green);}
+.empty-state{text-align:center;padding:50px 20px;color:var(--ink-soft);}
+.empty-state .stamp{width:80px;height:80px;border-radius:50%;border:3px dashed var(--gold);margin:0 auto 14px;
+  display:flex;align-items:center;justify-content:center;font-size:32px;transform:rotate(-8deg);}
+.overlay{position:fixed;inset:0;background:rgba(15,28,22,0.55);display:none;align-items:flex-end;
+  justify-content:center;z-index:100;}
+.overlay.show{display:flex;}
+.sheet{background:var(--page);width:100%;max-width:480px;border-radius:20px 20px 0 0;padding:22px 22px 26px;
+  max-height:88vh;overflow-y:auto;animation:slideup .22s ease;}
+@keyframes slideup{from{transform:translateY(30px);opacity:0;}to{transform:translateY(0);opacity:1;}}
+.sheet h3{font-family:'Aref Ruqaa',serif;font-size:19px;margin:0 0 16px;color:var(--cover-dark);}
+.field{margin-bottom:14px;} .field label{display:block;font-size:12.5px;font-weight:700;color:var(--ink-soft);margin-bottom:5px;}
+.field input, .field select, .field textarea{width:100%;padding:10px 12px;border-radius:8px;
+  border:1.5px solid var(--line);background:#fff;font-family:'Tajawal',sans-serif;font-size:14px;color:var(--ink);}
+.field textarea{resize:vertical;min-height:56px;}
+.field .hint{font-size:11px;color:var(--ink-soft);margin-top:4px;}
+.field .err{font-size:11.5px;color:var(--red);margin-top:4px;font-weight:700;display:none;}
+.checkbox-row{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:var(--ink-soft);}
+.sheet-actions{display:flex;gap:10px;margin-top:6px;}
+.sheet-actions button{flex:1;padding:12px;border-radius:10px;border:none;font-weight:700;cursor:pointer;
+  font-family:'Tajawal',sans-serif;}
+.btn-cancel{background:var(--page-dark);color:var(--ink-soft);}
+.btn-save{background:var(--cover);color:var(--page);}
+.btn-danger{background:var(--red);color:#fff;}
+.fab{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);max-width:480px;
+  width:calc(100% - 40px);display:flex;gap:10px;z-index:50;}
+.fab button{flex:1;padding:14px;border-radius:14px;border:none;font-weight:900;font-size:14px;
+  cursor:pointer;box-shadow:0 6px 16px rgba(0,0,0,0.25);font-family:'Tajawal',sans-serif;color:#fff;}
+.detail-header{display:flex;align-items:center;gap:12px;margin-bottom:6px;}
+.back-btn{background:none;border:none;font-size:20px;cursor:pointer;color:var(--cover-dark);}
+.detail-balance{background:var(--cover);color:var(--page);border-radius:14px;padding:18px;
+  text-align:center;margin:14px 0 18px;}
+.detail-balance .amt{font-size:26px;font-weight:900;} .detail-balance .lbl{font-size:12px;color:var(--gold);margin-top:4px;}
+.icon-actions{display:flex;gap:8px;margin-bottom:6px;flex-wrap:wrap;}
+.icon-actions button{flex:1;min-width:90px;padding:9px 6px;border-radius:10px;border:1.5px solid var(--cover);
+  background:transparent;color:var(--cover-dark);font-size:11.5px;font-weight:700;cursor:pointer;
+  font-family:'Tajawal',sans-serif;}
+.tx-row{display:flex;gap:10px;padding:12px 0;border-bottom:1px dashed var(--line);align-items:flex-start;}
+.tx-dot{width:34px;height:34px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;
+  justify-content:center;font-weight:900;color:#fff;font-size:14px;}
+.tx-dot.debt{background:var(--red);} .tx-dot.pay{background:var(--green);}
+.tx-body{flex:1;min-width:0;} .tx-amt{font-weight:900;font-size:15px;}
+.tx-amt.debt{color:var(--red);} .tx-amt.pay{color:var(--green);}
+.tx-note{font-size:12.5px;color:var(--ink-soft);margin-top:2px;}
+.tx-date{font-size:11px;color:var(--ink-soft);opacity:.8;margin-top:2px;}
+.tx-due{font-size:11px;margin-top:3px;font-weight:700;padding:2px 8px;border-radius:8px;display:inline-block;}
+.tx-due.ok{background:rgba(62,124,89,0.15);color:var(--green-dark);}
+.tx-due.soon{background:rgba(184,147,90,0.2);color:#8A6A2F;}
+.tx-due.late{background:rgba(161,61,61,0.15);color:var(--red-dark);}
+.tx-thumb{width:44px;height:44px;border-radius:8px;object-fit:cover;margin-top:6px;cursor:pointer;
+  border:1px solid var(--line);}
+.tx-actions{display:flex;gap:6px;margin-top:6px;}
+.tx-actions button{border:none;background:var(--page-dark);border-radius:6px;padding:4px 8px;font-size:11px;
+  cursor:pointer;color:var(--ink-soft);font-weight:700;}
+.expense-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;
+  border-bottom:1px dashed var(--line);}
+.expense-row .cat{font-weight:700;font-size:14px;}
+.expense-row .amt.in{color:var(--green);font-weight:900;} .expense-row .amt.out{color:var(--red);font-weight:900;}
+.stat-grid{display:flex;gap:10px;margin-bottom:18px;}
+.stat-box{flex:1;background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px;text-align:center;}
+.stat-box .n{font-size:18px;font-weight:900;} .stat-box .l{font-size:10.5px;color:var(--ink-soft);margin-top:3px;}
+.masked{letter-spacing:2px;}
+.range-tabs{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;}
+.range-tabs button{padding:7px 12px;border-radius:16px;border:1.5px solid var(--line);background:#fff;
+  font-size:12px;font-weight:700;cursor:pointer;color:var(--ink-soft);}
+.range-tabs button.active{background:var(--cover);color:var(--page);border-color:var(--cover);}
+.reminder-item{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:10px;}
+.reminder-item .top{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
+.reminder-item .who{font-weight:700;font-size:14px;}
+.badge{font-size:10.5px;font-weight:800;padding:3px 9px;border-radius:10px;}
+.badge.late{background:rgba(161,61,61,0.15);color:var(--red-dark);}
+.badge.today{background:rgba(184,147,90,0.25);color:#8A6A2F;}
+.badge.soon{background:rgba(62,124,89,0.15);color:var(--green-dark);}
+.file-drop{border:1.5px dashed var(--line);border-radius:10px;padding:14px;text-align:center;
+  cursor:pointer;font-size:12.5px;color:var(--ink-soft);background:#fff;}
+.img-preview{width:100%;max-height:160px;object-fit:contain;border-radius:8px;margin-top:8px;}
+.lightbox{position:fixed;inset:0;background:rgba(0,0,0,0.85);display:none;align-items:center;
+  justify-content:center;z-index:200;padding:20px;}
+.lightbox.show{display:flex;} .lightbox img{max-width:100%;max-height:100%;border-radius:8px;}
+@media print{
+  body *{visibility:hidden;}
+  .print-area, .print-area *{visibility:visible;}
+  .print-area{position:absolute;top:0;right:0;left:0;padding:20px;}
+}
+</style>
+<!-- Firebase SDK (Auth + Firestore) - نسخة compat لتعمل بدون أدوات بناء -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+</head>
+<body>
+<div class="app-shell" id="app">
+  <div class="spine"></div>
+  <header class="cover">
+    <div class="brand-row">
+      <div class="brand">كناش <span>دفتر حساباتك</span></div>
+      <div class="header-actions">
+        <button class="icon-btn" id="installBtn" title="تثبيت التطبيق" style="display:none">⬇️</button>
+        <button class="icon-btn" id="eyeBtn" title="إخفاء/إظهار المبالغ">👁️</button>
+        <button class="icon-btn" id="settingsBtn" title="الإعدادات والمزامنة">⚙️</button>
+      </div>
+    </div>
+    <div class="summary-row">
+      <div class="sum-card owed"><div class="lbl">مستحق لي</div><div class="val" id="sumOwed">0</div></div>
+      <div class="sum-card owe"><div class="lbl">مستحق عليّ</div><div class="val" id="sumOwe">0</div></div>
+      <div class="sum-card profit"><div class="lbl">صافي اليوم</div><div class="val" id="sumProfit">0</div></div>
+    </div>
+    <div class="reminder-banner" id="reminderBanner" style="display:none" onclick="setTab('reminders')"></div>
+  </header>
+
+  <nav class="tabs" id="tabs">
+    <button data-tab="home" class="active">الرئيسية</button>
+    <button data-tab="customers">الزبائن</button>
+    <button data-tab="suppliers">الموردون</button>
+    <button data-tab="expenses">المداخيل</button>
+    <button data-tab="reminders">التذكيرات</button>
+  </nav>
+
+  <main id="main"></main>
+  <div class="fab" id="fab"></div>
+</div>
+
+<div class="overlay" id="overlay"><div class="sheet" id="sheet"></div></div>
+<div class="lightbox" id="lightbox" onclick="this.classList.remove('show')"><img id="lightboxImg" src=""></div>
+
+<script>
+const STORAGE_KEY = 'kannash-app-data';
+let state = {
+  contacts: [], transactions: [], expenses: [],
+  settings: { hideBalances:false, shopName:'', reminderLeadDays:1, lastReminderPopup:'', fbLoggedIn:false, userId:'', userEmail:'', userPhone:'', autoBackupEnabled:true, lastCloudBackup:'' }
+};
+let currentTab = 'home';
+let currentContactId = null;
+let pendingImage = null;
+
+/* ---------- Helpers ---------- */
+function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+function fmt(n){ return (Math.round(n*100)/100).toLocaleString('ar-MA'); }
+function displayAmt(n){ return state.settings.hideBalances ? '•••••' : fmt(n); }
+function todayStr(){ return new Date().toISOString().slice(0,10); }
+function nowIso(){ return new Date().toISOString(); }
+function daysBetween(a,b){ return Math.round((new Date(b)-new Date(a))/86400000); }
+function escapeHtml(s){ return (s||'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+function validateAmount(v){
+  const n = parseFloat(v);
+  return Number.isFinite(n) && n > 0 ? n : null;
+}
+function validateName(v){
+  const t = (v||'').trim();
+  return t.length >= 2 ? t : null;
+}
+// يحوّل الرقم المحلي (06.../07...) إلى الصيغة الدولية (212...) تلقائياً لروابط واتساب
+function normalizePhone(raw){
+  if(!raw) return null;
+  let p = raw.replace(/[^0-9+]/g,'');
+  if(p.startsWith('+')) p = p.slice(1);
+  if(p.startsWith('00')) p = p.slice(2);
+  if(p.startsWith('0')) p = '212' + p.slice(1);       // صفر محلي -> مفتاح المغرب الدولي
+  else if(!p.startsWith('212') && p.length <= 10) p = '212' + p; // رقم بدون صفر ولا مفتاح دولي
+  return p.length >= 10 ? p : null;
+}
+
+// طبقة حفظ ذكية: تجرب window.storage أولاً (بيئة Claude)، وإن لم تكن متوفرة
+// (مثلاً عند فتح الملف مباشرة كتطبيق مستقل على الهاتف) تتحول تلقائياً إلى
+// localStorage القياسي، وإن فشل هذا أيضاً تُبقي البيانات في الذاكرة المؤقتة فقط.
+let STORAGE_MODE = null; // 'claude' | 'local' | 'memory'
+let memoryFallback = null;
+
+async function storageSet(key, value){
+  if(STORAGE_MODE !== 'local' && STORAGE_MODE !== 'memory'){
+    try{
+      if(window.storage && typeof window.storage.set === 'function'){
+        const r = await window.storage.set(key, value, false);
+        STORAGE_MODE = 'claude';
+        return r;
+      }
+    }catch(e){ /* غير متوفر، ننتقل للبديل */ }
+  }
+  try{
+    localStorage.setItem(key, value);
+    STORAGE_MODE = 'local';
+    return {key, value};
+  }catch(e2){
+    memoryFallback = value;
+    STORAGE_MODE = 'memory';
+    return {key, value};
+  }
+}
+async function storageGet(key){
+  if(STORAGE_MODE !== 'local' && STORAGE_MODE !== 'memory'){
+    try{
+      if(window.storage && typeof window.storage.get === 'function'){
+        const r = await window.storage.get(key, false);
+        STORAGE_MODE = 'claude';
+        return r;
+      }
+    }catch(e){ /* غير متوفر، ننتقل للبديل */ }
+  }
+  try{
+    const v = localStorage.getItem(key);
+    STORAGE_MODE = STORAGE_MODE==='claude' ? STORAGE_MODE : 'local';
+    return v ? {key, value:v} : null;
+  }catch(e2){
+    return memoryFallback ? {key, value: memoryFallback} : null;
+  }
+}
+
+async function save(){
+  try{
+    const ok = await storageSet(STORAGE_KEY, JSON.stringify(state));
+    if(!ok) throw new Error('empty result');
+    if(STORAGE_MODE === 'memory') showStorageWarning();
+  }catch(e){
+    console.error('تعذر حفظ البيانات بكل الطرق المتاحة', e);
+    showStorageWarning();
+  }
+  scheduleAutoBackup();
+}
+let warnedOnce = false;
+function showStorageWarning(){
+  if(warnedOnce) return; warnedOnce = true;
+  alert('تنبيه: لم يتمكن المتصفح من حفظ البيانات بشكل دائم على هذا الجهاز (قد يكون بسبب وضع التصفح الخاص). ستبقى بياناتك متاحة خلال هذه الجلسة فقط.');
+}
+
+/* ---------- Firebase: تهيئة التطبيق (Auth + Firestore) ---------- */
+// بيانات مشروع Firebase الخاص بك مثبّتة هنا مباشرة — بهذا يتصل أي جهاز يفتح التطبيق
+// تلقائياً بنفس قاعدة البيانات، ولا يحتاج المستخدم لإدخال أي إعدادات تقنية، فقط تسجيل الدخول.
+// (apiKey في تطبيقات الويب ليس سراً؛ الحماية الفعلية تأتي من قواعد أمان Firestore)
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyBhAUM5YYeoVxs1sfK9RokwLDnGRHxaGHo",
+  authDomain: "kannash-app.firebaseapp.com",
+  projectId: "kannash-app",
+  storageBucket: "kannash-app.firebasestorage.app",
+  messagingSenderId: "477030835080",
+  appId: "1:477030835080:web:4b3573a59b2f074ac9103d"
+};
+
+function initFirebaseIfConfigured(){
+  if(typeof firebase === 'undefined') return null; // فشل تحميل مكتبة Firebase (لا اتصال إنترنت مثلاً)
+  try{
+    if(!firebase.apps.length){
+      firebase.initializeApp(FIREBASE_CONFIG);
+      firebase.auth().onAuthStateChanged(async (user)=>{
+        if(user){
+          state.settings.fbLoggedIn = true;
+          state.settings.userId = user.uid;
+          if(user.email) state.settings.userEmail = user.email;
+          if(user.phoneNumber) state.settings.userPhone = user.phoneNumber;
+        } else {
+          state.settings.fbLoggedIn = false;
+        }
+        try{ await storageSet(STORAGE_KEY, JSON.stringify(state)); }catch(e){}
+      });
+    }
+    return firebase;
+  }catch(e){ console.error('تعذر تهيئة Firebase', e); return null; }
+}
+
+/* ---------- نسخ احتياطي سحابي تلقائي (Firestore): عند كل تغيير (مؤجَّل قليلاً)، وعلى الأقل أسبوعياً ---------- */
+let autoBackupTimer = null;
+function scheduleAutoBackup(){
+  const s = state.settings;
+  if(!s.fbLoggedIn || s.autoBackupEnabled === false) return;
+  clearTimeout(autoBackupTimer);
+  autoBackupTimer = setTimeout(silentCloudBackup, 4000); // تأجيل 4 ثوانٍ لتجميع عدة تعديلات متتالية في نسخة واحدة
+}
+async function silentCloudBackup(){
+  const s = state.settings;
+  if(!s.fbLoggedIn || s.autoBackupEnabled === false) return;
+  const fb = initFirebaseIfConfigured();
+  const user = fb && fb.auth().currentUser;
+  if(!fb || !user) return;
+  try{
+    await fb.firestore().collection('kannash_data').doc(user.uid).set({
+      data: JSON.stringify({contacts:state.contacts, transactions:state.transactions, expenses:state.expenses}),
+      updatedAt: fb.firestore.FieldValue.serverTimestamp()
+    });
+    // نحدّث توقيت آخر نسخة احتياطية مباشرة عبر التخزين بدون المرور من save() لتفادي حلقة تكرار لا نهائية
+    state.settings.lastCloudBackup = nowIso();
+    try{ await storageSet(STORAGE_KEY, JSON.stringify(state)); }catch(e){}
+  }catch(e){ console.warn('فشل النسخ الاحتياطي التلقائي (لن يُزعجك التطبيق بتنبيه لهذا)', e); }
+}
+// يُنفَّذ عند كل فتح للتطبيق: يضمن نسخة احتياطية واحدة على الأقل أسبوعياً حتى لو لم يحدث أي تعديل جديد
+function maybeWeeklyBackup(){
+  const s = state.settings;
+  if(!s.fbLoggedIn || s.autoBackupEnabled === false) return;
+  if(!s.lastCloudBackup || daysBetween(s.lastCloudBackup.slice(0,10), todayStr()) >= 7){
+    silentCloudBackup();
+  }
+}
+async function load(){
+  try{
+    const res = await storageGet(STORAGE_KEY);
+    if(res && res.value){
+      const loaded = JSON.parse(res.value);
+      state = Object.assign(state, loaded);
+      state.settings = Object.assign({hideBalances:false,shopName:'',reminderLeadDays:1,lastReminderPopup:'',fbLoggedIn:false,userId:'',userEmail:'',userPhone:'',autoBackupEnabled:true,lastCloudBackup:''}, loaded.settings||{});
+    }
+  }catch(e){ /* لا توجد بيانات محفوظة سابقاً - نبدأ بدفتر جديد */ }
+  render();
+  checkDueReminders();
+  initFirebaseIfConfigured();
+  maybeWeeklyBackup();
+}
+
+/* ---------- Image compression ---------- */
+function compressImage(file){
+  return new Promise((resolve,reject)=>{
+    const reader = new FileReader();
+    reader.onload = e => {
+      const img = new Image();
+      img.onload = () => {
+        const maxW = 800;
+        const scale = Math.min(1, maxW/img.width);
+        const canvas = document.createElement('canvas');
+        canvas.width = img.width*scale; canvas.height = img.height*scale;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img,0,0,canvas.width,canvas.height);
+        resolve(canvas.toDataURL('image/jpeg', 0.6));
+      };
+      img.onerror = reject;
+      img.src = e.target.result;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+/* ---------- Computations ---------- */
+function contactBalance(id){
+  return state.transactions.filter(t=>t.contactId===id)
+    .reduce((s,t)=> s + (t.type==='debt'? t.amount : -t.amount), 0);
+}
+function upcomingReminders(){
+  const today = todayStr();
+  return state.transactions.filter(t=>{
+    if(t.type!=='debt' || !t.dueDate) return false;
+    const c = state.contacts.find(x=>x.id===t.contactId);
+    if(!c || contactBalance(c.id) <= 0) return false;
+    const d = daysBetween(today, t.dueDate);
+    return d <= 7; // متأخر، اليوم، أو خلال أسبوع
+  }).sort((a,b)=> new Date(a.dueDate)-new Date(b.dueDate));
+}
+// ملاحظة: تم استبدال هذه الدالة بـ checkDueReminders() الأكثر تكاملاً (تفتح نافذة تذكير مباشرة)
+
+// تُفحص عند كل فتح للتطبيق: أي دين يقترب استحقاقه خلال "عدد أيام التذكير" المحدد في الإعدادات
+// (يوم واحد افتراضياً)، ولم يُعرض تذكيره اليوم بعد، تُعرض له نافذة تذكير فورية بضغطة واحدة للإرسال.
+function dueSoonList(){
+  const lead = Math.max(0, parseInt(state.settings.reminderLeadDays) || 1);
+  const today = todayStr();
+  return state.transactions.filter(t=>{
+    if(t.type!=='debt' || !t.dueDate) return false;
+    const c = state.contacts.find(x=>x.id===t.contactId);
+    if(!c || contactBalance(c.id) <= 0) return false;
+    const diff = daysBetween(today, t.dueDate);
+    return diff <= lead && t.lastReminderShown !== today;
+  }).sort((a,b)=> new Date(a.dueDate)-new Date(b.dueDate));
+}
+function dueBadge(diff){
+  if(diff<0) return {cls:'late', label:`متأخر ${Math.abs(diff)} يوم`};
+  if(diff===0) return {cls:'today', label:'مستحق اليوم'};
+  if(diff===1) return {cls:'soon', label:'مستحق غداً'};
+  return {cls:'soon', label:`بعد ${diff} أيام`};
+}
+function checkDueReminders(){
+  const list = dueSoonList();
+  if(list.length===0) return;
+  try{
+    if(window.Notification && Notification.permission === 'granted'){
+      new Notification('كناش - تذكير بالديون', { body: `لديك ${list.length} دين${list.length>1?'وناً':''} يقترب موعد استحقاقه.` });
+    }
+  }catch(e){ /* الإشعارات غير مدعومة */ }
+  showSheet(renderDueReminderModal(list));
+}
+function renderDueReminderModal(list){
+  const rows = list.map(t=>{
+    const c = state.contacts.find(x=>x.id===t.contactId);
+    const diff = daysBetween(todayStr(), t.dueDate);
+    const b = dueBadge(diff);
+    return `<div class="reminder-item">
+      <div class="top"><span class="who">${c?escapeHtml(c.name):'؟'}</span><span class="badge ${b.cls}">${b.label}</span></div>
+      <div style="font-size:13px;color:var(--ink-soft);margin-bottom:8px">المبلغ: ${displayAmt(t.amount)} درهم — الاستحقاق: ${t.dueDate}</div>
+      <div class="icon-actions">
+        <button onclick="markAndSend('${t.id}','${t.contactId}')">💬 إرسال تذكير الآن</button>
+        <button onclick="quickSettle('${t.contactId}',${t.amount})" style="border-color:var(--green);color:var(--green-dark)">✅ تسديد الآن</button>
+        <button onclick="dismissReminder('${t.id}')">تجاهل اليوم</button>
+      </div>
+    </div>`;
+  }).join('');
+  return `<h3>⏰ تذكير: ديون تقترب من الاستحقاق</h3>${rows}
+    <div class="sheet-actions" style="margin-top:6px">
+      <button class="btn-cancel" onclick="dismissAllReminders()">تجاهل الكل لهذا اليوم</button>
+      <button class="btn-save" onclick="closeSheet()">إغلاق</button>
+    </div>`;
+}
+async function markAndSend(txId, contactId){
+  const t = state.transactions.find(x=>x.id===txId);
+  if(t) t.lastReminderShown = todayStr();
+  await save();
+  sendDueReminder(contactId, txId);
+  const remaining = dueSoonList();
+  if(remaining.length) showSheet(renderDueReminderModal(remaining)); else closeSheet();
+}
+async function dismissReminder(txId){
+  const t = state.transactions.find(x=>x.id===txId);
+  if(t) t.lastReminderShown = todayStr();
+  await save();
+  const remaining = dueSoonList();
+  if(remaining.length) showSheet(renderDueReminderModal(remaining)); else closeSheet();
+}
+async function dismissAllReminders(){
+  const today = todayStr();
+  dueSoonList().forEach(t=> t.lastReminderShown = today);
+  await save(); closeSheet();
+}
+
+/* ---------- Rendering ---------- */
+function renderTabs(){
+  document.querySelectorAll('#tabs button').forEach(b=> b.classList.toggle('active', b.dataset.tab===currentTab));
+}
+function renderSummary(){
+  const customers = state.contacts.filter(c=>c.type==='customer');
+  const suppliers = state.contacts.filter(c=>c.type==='supplier');
+  let owed=0, owe=0;
+  customers.forEach(c=>{ const b=contactBalance(c.id); if(b>0) owed+=b; });
+  suppliers.forEach(c=>{ const b=contactBalance(c.id); if(b>0) owe+=b; });
+  const today = todayStr();
+  const inc = state.expenses.filter(e=>e.date===today && e.kind==='income').reduce((s,e)=>s+e.amount,0);
+  const exp = state.expenses.filter(e=>e.date===today && e.kind==='expense').reduce((s,e)=>s+e.amount,0);
+  document.getElementById('sumOwed').textContent = displayAmt(owed);
+  document.getElementById('sumOwe').textContent = displayAmt(owe);
+  document.getElementById('sumProfit').textContent = displayAmt(inc-exp);
+
+  const rem = upcomingReminders();
+  const banner = document.getElementById('reminderBanner');
+  if(rem.length){
+    const late = rem.filter(t=>daysBetween(todayStr(),t.dueDate)<0).length;
+    banner.style.display='flex';
+    banner.innerHTML = `<span>⏰ لديك ${rem.length} تذكير${rem.length>1?'ات':''} ${late? '(منها '+late+' متأخر)':''}</span><span>عرض ←</span>`;
+  } else { banner.style.display='none'; }
+}
+function contactInitial(name){ return name.trim().charAt(0) || '؟'; }
+
+function contactListHTML(type){
+  const list = state.contacts.filter(c=>c.type===type);
+  if(list.length===0){
+    return `<div class="empty-state"><div class="stamp">✒️</div>لا يوجد ${type==='customer'?'زبائن':'موردون'} بعد<br><span style="font-size:12px">اضغط + لإضافة أول ${type==='customer'?'زبون':'مورد'}</span></div>`;
+  }
+  return list.map(c=>{
+    const b = contactBalance(c.id);
+    let cls='zero', txt='مسدد بالكامل';
+    if(type==='customer'){
+      if(b>0){cls='owe'; txt=displayAmt(b)+' درهم';}
+      else if(b<0){cls='credit'; txt='له رصيد '+displayAmt(-b);}
+    } else {
+      if(b>0){cls='owe'; txt='تدين له '+displayAmt(b);}
+      else if(b<0){cls='credit'; txt='لك رصيد '+displayAmt(-b);}
+    }
+    return `<div class="contact-card" onclick="openContact('${c.id}')">
+      <div class="avatar">${contactInitial(c.name)}</div>
+      <div class="contact-info"><div class="name">${escapeHtml(c.name)}</div><div class="phone">${escapeHtml(c.phone||'')}</div></div>
+      <div class="balance-tag ${cls}">${txt}</div>
+    </div>`;
+  }).join('');
+}
+
+function renderHome(){
+  const recent = [...state.transactions].sort((a,b)=> new Date(b.date)-new Date(a.date)).slice(0,8);
+  let html = `<div class="section-title">آخر الحركات</div>`;
+  if(recent.length===0){
+    html += `<div class="empty-state"><div class="stamp">📖</div>دفترك فارغ<br><span style="font-size:12px">ابدأ بإضافة زبون أو مورد</span></div>`;
+  } else {
+    html += recent.map(t=>{
+      const c = state.contacts.find(x=>x.id===t.contactId);
+      return `<div class="tx-row">
+        <div class="tx-dot ${t.type==='debt'?'debt':'pay'}">${t.type==='debt'?'د':'ت'}</div>
+        <div class="tx-body">
+          <div class="tx-amt ${t.type==='debt'?'debt':'pay'}">${displayAmt(t.amount)} درهم — ${c?escapeHtml(c.name):'؟'}</div>
+          ${t.note? `<div class="tx-note">${escapeHtml(t.note)}</div>`:''}
+          <div class="tx-date">${new Date(t.date).toLocaleString('ar-MA')}</div>
+          ${t.image? `<img class="tx-thumb" src="${t.image}" onclick="showLightbox('${t.image.replace(/'/g,"")}')">`:''}
+        </div>
+      </div>`;
+    }).join('');
+  }
+  return html;
+}
+
+let expenseRange = 'today';
+function filterExpensesByRange(){
+  const today = new Date();
+  return state.expenses.filter(e=>{
+    const d = new Date(e.date);
+    if(expenseRange==='today') return e.date===todayStr();
+    if(expenseRange==='week'){ const diff=daysBetween(e.date, todayStr()); return diff>=0 && diff<7; }
+    if(expenseRange==='month') return d.getMonth()===today.getMonth() && d.getFullYear()===today.getFullYear();
+    return true;
+  });
+}
+function renderExpenses(){
+  const filtered = filterExpensesByRange();
+  const inc = filtered.filter(e=>e.kind==='income').reduce((s,e)=>s+e.amount,0);
+  const exp = filtered.filter(e=>e.kind==='expense').reduce((s,e)=>s+e.amount,0);
+  let html = `<div class="range-tabs">
+    <button class="${expenseRange==='today'?'active':''}" onclick="setExpenseRange('today')">اليوم</button>
+    <button class="${expenseRange==='week'?'active':''}" onclick="setExpenseRange('week')">هذا الأسبوع</button>
+    <button class="${expenseRange==='month'?'active':''}" onclick="setExpenseRange('month')">هذا الشهر</button>
+    <button class="${expenseRange==='all'?'active':''}" onclick="setExpenseRange('all')">الكل</button>
+  </div>`;
+  html += `<div class="stat-grid">
+    <div class="stat-box"><div class="n" style="color:var(--green)">${displayAmt(inc)}</div><div class="l">مداخيل</div></div>
+    <div class="stat-box"><div class="n" style="color:var(--red)">${displayAmt(exp)}</div><div class="l">مصاريف</div></div>
+    <div class="stat-box"><div class="n" style="color:var(--cover)">${displayAmt(inc-exp)}</div><div class="l">صافي الربح</div></div>
+  </div>`;
+  html += `<div class="section-title">السجل</div>`;
+  const all = [...filtered].sort((a,b)=> new Date(b.date+(b.time||''))-new Date(a.date+(a.time||'')));
+  if(all.length===0){
+    html += `<div class="empty-state"><div class="stamp">💰</div>لا توجد حركات في هذه الفترة</div>`;
+  } else {
+    html += all.map(e=>`<div class="expense-row">
+      <span class="cat">${escapeHtml(e.category)}</span>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span class="amt ${e.kind==='income'?'in':'out'}">${e.kind==='income'?'+':'-'}${displayAmt(e.amount)}</span>
+        <div class="tx-actions">
+          <button onclick="editExpense('${e.id}')">تعديل</button>
+          <button onclick="deleteExpense('${e.id}')">حذف</button>
+        </div>
+      </div>
+    </div>`).join('');
+  }
+  return html;
+}
+function setExpenseRange(r){ expenseRange=r; render(); }
+
+function renderReminders(){
+  const rem = upcomingReminders();
+  let html = `<div class="section-title">التذكيرات القادمة والمتأخرة</div>`;
+  html += `<button class="pill-btn ghost" style="margin-bottom:14px;width:100%" onclick="requestNotifPermission()">🔔 تفعيل إشعارات المتصفح</button>`;
+  if(rem.length===0){
+    html += `<div class="empty-state"><div class="stamp">✅</div>لا توجد ديون مستحقة قريباً</div>`;
+    return html;
+  }
+  html += rem.map(t=>{
+    const c = state.contacts.find(x=>x.id===t.contactId);
+    const diff = daysBetween(todayStr(), t.dueDate);
+    let badge='soon', label=`بعد ${diff} يوم`;
+    if(diff<0){ badge='late'; label=`متأخر ${Math.abs(diff)} يوم`; }
+    else if(diff===0){ badge='today'; label='مستحق اليوم'; }
+    return `<div class="reminder-item">
+      <div class="top"><span class="who">${c?escapeHtml(c.name):'؟'}</span><span class="badge ${badge}">${label}</span></div>
+      <div style="font-size:13px;color:var(--ink-soft);margin-bottom:8px">المبلغ: ${displayAmt(t.amount)} درهم — الاستحقاق: ${t.dueDate}</div>
+      <div class="icon-actions">
+        <button onclick="sendDueReminder('${c.id}','${t.id}')">💬 إرسال تذكير واتساب</button>
+        <button onclick="quickSettle('${c.id}',${t.amount})" style="border-color:var(--green);color:var(--green-dark)">✅ تسديد الآن</button>
+        <button onclick="openContact('${c.id}');setTab('${c.type==='customer'?'customers':'suppliers'}')">عرض الحساب</button>
+      </div>
+    </div>`;
+  }).join('');
+  return html;
+}
+function requestNotifPermission(){
+  if(!window.Notification){ alert('المتصفح لا يدعم الإشعارات.'); return; }
+  Notification.requestPermission().then(p=>{
+    if(p==='granted') alert('تم تفعيل الإشعارات بنجاح.'); else alert('لم يتم منح إذن الإشعارات.');
+  });
+}
+
+function renderContactDetail(id){
+  const c = state.contacts.find(x=>x.id===id);
+  if(!c) return '<div class="empty-state">لم يتم العثور على جهة الاتصال</div>';
+  const b = contactBalance(id);
+  const txs = state.transactions.filter(t=>t.contactId===id).sort((a,b)=>new Date(b.date)-new Date(a.date));
+  const isCustomer = c.type==='customer';
+  let balLabel = 'الحساب مسدد بالكامل';
+  if(b>0) balLabel = isCustomer? 'مستحق عليه' : 'مستحق عليك (تدين له)';
+  if(b<0) balLabel = isCustomer? 'له رصيد زائد' : 'لك رصيد زائد';
+
+  let html = `<div class="detail-header">
+    <button class="back-btn" onclick="setTab('${c.type==='customer'?'customers':'suppliers'}')">→</button>
+    <div style="flex:1"><div style="font-weight:900;font-size:17px">${escapeHtml(c.name)}</div><div style="font-size:12px;color:var(--ink-soft)">${escapeHtml(c.phone||'بدون رقم هاتف')}</div></div>
+    <button class="icon-btn" style="color:var(--cover-dark);border-color:var(--cover)" onclick="openContactModal('${c.type}','${id}')">✎</button>
+  </div>
+  <div class="detail-balance"><div class="amt">${displayAmt(Math.abs(b))} درهم</div><div class="lbl">${balLabel}</div></div>
+  <div class="icon-actions">
+    <button onclick="openPdfRangeModal('${id}')">🖨️ كشف حساب PDF</button>
+    <button onclick="sendWhatsapp('${id}')">💬 تذكير واتساب</button>
+    <button onclick="deleteContact('${id}')" style="border-color:var(--red);color:var(--red)">🗑 حذف الجهة</button>
+  </div>
+  <div class="section-title">سجل المعاملات</div>`;
+
+  if(txs.length===0){
+    html += `<div class="empty-state"><div class="stamp">🪙</div>لا توجد معاملات مسجلة</div>`;
+  } else {
+    html += txs.map(t=>{
+      let dueHtml='';
+      if(t.dueDate){
+        const diff = daysBetween(todayStr(), t.dueDate);
+        const cls = diff<0?'late':(diff<=2?'soon':'ok');
+        dueHtml = `<span class="tx-due ${cls}">استحقاق: ${t.dueDate}</span>`;
+      }
+      return `<div class="tx-row">
+        <div class="tx-dot ${t.type==='debt'?'debt':'pay'}">${t.type==='debt'?'د':'ت'}</div>
+        <div class="tx-body">
+          <div class="tx-amt ${t.type==='debt'?'debt':'pay'}">${t.type==='debt'?'دين':'تسديد'} ${displayAmt(t.amount)} درهم</div>
+          ${t.note? `<div class="tx-note">${escapeHtml(t.note)}</div>`:''}
+          <div class="tx-date">${new Date(t.date).toLocaleString('ar-MA')}</div>
+          ${dueHtml}
+          ${t.image? `<div><img class="tx-thumb" src="${t.image}" onclick="showLightbox('${t.id}')"></div>`:''}
+          <div class="tx-actions">
+            <button onclick="editTx('${t.id}')">تعديل</button>
+            <button onclick="deleteTx('${t.id}')">حذف</button>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+  return html;
+}
+function showLightbox(idOrSrc){
+  let src = idOrSrc;
+  if(!idOrSrc.startsWith('data:')){
+    const t = state.transactions.find(x=>x.id===idOrSrc);
+    src = t? t.image : '';
+  }
+  if(!src) return;
+  document.getElementById('lightboxImg').src = src;
+  document.getElementById('lightbox').classList.add('show');
+}
+
+function render(){
+  const main = document.getElementById('main'); const fab = document.getElementById('fab');
+  try{
+    renderTabs(); renderSummary();
+    if(currentTab==='home'){
+      main.innerHTML = renderHome();
+      fab.innerHTML = `<button class="pill-btn red" onclick="openTxModal('debt')">+ أعطيت / دين</button>
+                        <button class="pill-btn green" onclick="openTxModal('pay')">+ أخذت / تسديد</button>`;
+    } else if(currentTab==='customers' || currentTab==='suppliers'){
+      const type = currentTab==='customers'?'customer':'supplier';
+      if(currentContactId){
+        main.innerHTML = renderContactDetail(currentContactId);
+        fab.innerHTML = `<button class="pill-btn red" onclick="openTxModal('debt','${currentContactId}')">+ أعطيت / دين</button>
+                          <button class="pill-btn green" onclick="openTxModal('pay','${currentContactId}')">+ أخذت / تسديد</button>`;
+      } else {
+        main.innerHTML = `<div class="section-title">${type==='customer'?'الزبائن':'الموردون'}</div>` + contactListHTML(type);
+        fab.innerHTML = `<button class="pill-btn" style="background:var(--cover);color:#fff;border:none" onclick="openContactModal('${type}')">+ إضافة ${type==='customer'?'زبون':'مورد'}</button>`;
+      }
+    } else if(currentTab==='expenses'){
+      main.innerHTML = renderExpenses();
+      fab.innerHTML = `<button class="pill-btn green" onclick="openExpenseModal('income')">+ مدخول</button>
+                        <button class="pill-btn red" onclick="openExpenseModal('expense')">+ مصروف</button>`;
+    } else if(currentTab==='reminders'){
+      main.innerHTML = renderReminders();
+      fab.innerHTML = '';
+    }
+  }catch(err){
+    console.error('خطأ أثناء العرض', err);
+    main.innerHTML = `<div class="empty-state"><div class="stamp">⚠️</div>حدث خطأ غير متوقع أثناء عرض هذه الصفحة.<br><span style="font-size:12px">اضغط الزر أدناه للعودة إلى الرئيسية</span><br><br>
+      <button class="pill-btn" onclick="currentContactId=null;setTab('home')">العودة للرئيسية</button></div>`;
+    fab.innerHTML = '';
+  }
+}
+function setTab(t){ currentTab=t; currentContactId=null; render(); }
+function openContact(id){ currentContactId=id; render(); }
+
+document.getElementById('tabs').addEventListener('click', e=>{
+  const btn = e.target.closest('button'); if(!btn) return;
+  currentContactId = null; currentTab = btn.dataset.tab; render();
+});
+document.getElementById('eyeBtn').addEventListener('click', async ()=>{
+  try{
+    state.settings.hideBalances = !state.settings.hideBalances;
+    document.getElementById('eyeBtn').textContent = state.settings.hideBalances? '🙈':'👁️';
+    await save(); render();
+  }catch(e){ console.error('eye toggle error', e); }
+});
+document.getElementById('settingsBtn').addEventListener('click', ()=>{
+  try{ openSettingsModal(); }catch(e){ console.error('settings open error', e); }
+});
+
+/* ---------- PWA: تثبيت التطبيق + Service Worker ---------- */
+if('serviceWorker' in navigator){
+  window.addEventListener('load', ()=>{
+    navigator.serviceWorker.register('service-worker.js').catch(e=> console.warn('تعذر تسجيل service worker', e));
+  });
+}
+let deferredInstallPrompt = null;
+window.addEventListener('beforeinstallprompt', (e)=>{
+  e.preventDefault();
+  deferredInstallPrompt = e;
+  const btn = document.getElementById('installBtn');
+  if(btn) btn.style.display = 'flex';
+});
+document.getElementById('installBtn').addEventListener('click', async ()=>{
+  if(deferredInstallPrompt){
+    deferredInstallPrompt.prompt();
+    await deferredInstallPrompt.userChoice;
+    deferredInstallPrompt = null;
+    document.getElementById('installBtn').style.display = 'none';
+  } else {
+    // متصفحات لا تدعم نافذة التثبيت التلقائية (مثل Safari على iOS) - نعرض تعليمات يدوية
+    const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+    if(isIOS){
+      alert('للتثبيت على آيفون: اضغط زر المشاركة (Share) في المتصفح، ثم اختر "إضافة إلى الشاشة الرئيسية".');
+    } else {
+      alert('يمكنك تثبيت التطبيق من قائمة المتصفح (⋮) ثم اختيار "تثبيت التطبيق" أو "إضافة إلى الشاشة الرئيسية".');
+    }
+  }
+});
+window.addEventListener('appinstalled', ()=>{
+  const btn = document.getElementById('installBtn');
+  if(btn) btn.style.display = 'none';
+});
+
+/* ---------- Modals: sheet helpers ---------- */
+function showSheet(html){ document.getElementById('sheet').innerHTML = html; document.getElementById('overlay').classList.add('show'); }
+function closeSheet(){ document.getElementById('overlay').classList.remove('show'); pendingImage=null; }
+document.getElementById('overlay').addEventListener('click', e=>{ if(e.target.id==='overlay') closeSheet(); });
+
+/* ---------- Contact modal (add + edit) ---------- */
+function openContactModal(type, editId){
+  const editing = state.contacts.find(c=>c.id===editId);
+  showSheet(`
+    <h3>${editing? 'تعديل بيانات':'إضافة'} ${type==='customer'?'زبون':'مورد'}</h3>
+    <div class="field"><label>الاسم</label><input id="cName" value="${editing?escapeHtml(editing.name):''}" placeholder="مثال: أحمد بنعلي">
+      <div class="err" id="cNameErr">الرجاء إدخال اسم صحيح (حرفان على الأقل)</div></div>
+    <div class="field"><label>رقم الهاتف (لواتساب)</label><input id="cPhone" value="${editing?escapeHtml(editing.phone||''):''}" placeholder="06XXXXXXXX" type="tel">
+      <div class="hint">سيُحوَّل تلقائياً للصيغة الدولية عند إرسال رسائل واتساب</div></div>
+    <div class="sheet-actions">
+      <button class="btn-cancel" onclick="closeSheet()">إلغاء</button>
+      <button class="btn-save" onclick="saveContact('${type}','${editId||''}')">حفظ</button>
+    </div>`);
+}
+async function saveContact(type, editId){
+  const nameVal = validateName(document.getElementById('cName').value);
+  if(!nameVal){ document.getElementById('cNameErr').style.display='block'; return; }
+  const phone = document.getElementById('cPhone').value.trim();
+  if(editId){
+    const c = state.contacts.find(x=>x.id===editId);
+    c.name = nameVal; c.phone = phone;
+  } else {
+    state.contacts.push({ id: uid(), name:nameVal, phone, type });
+  }
+  await save(); closeSheet(); render();
+}
+async function deleteContact(id){
+  const hasTx = state.transactions.some(t=>t.contactId===id);
+  const msg = hasTx? 'هذه الجهة لديها معاملات مسجلة. سيتم حذفها هي وجميع معاملاتها نهائياً. متابعة؟' : 'هل تريد حذف هذه الجهة نهائياً؟';
+  if(!confirm(msg)) return;
+  state.contacts = state.contacts.filter(c=>c.id!==id);
+  state.transactions = state.transactions.filter(t=>t.contactId!==id);
+  await save(); currentContactId=null; render();
+}
+
+/* ---------- Transaction modal (add + edit) ---------- */
+function openTxModal(type, contactId, editId, prefillAmount){
+  const editing = editId? state.transactions.find(t=>t.id===editId) : null;
+  if(editing){ type = editing.type; contactId = editing.contactId; }
+  const contacts = state.contacts;
+  const options = contacts.map(c=>`<option value="${c.id}" ${c.id===contactId?'selected':''}>${escapeHtml(c.name)} (${c.type==='customer'?'زبون':'مورد'})</option>`).join('');
+  pendingImage = editing? editing.image : null;
+  const amountVal = editing ? editing.amount : (prefillAmount!=null ? prefillAmount : '');
+  showSheet(`
+    <h3>${editing? 'تعديل ':''}${type==='debt'?'تسجيل دين (أعطيت)':'تسجيل تسديد (أخذت)'}</h3>
+    ${contacts.length===0? '<p style="color:var(--red);font-size:13px">أضف زبوناً أو مورداً أولاً</p>' : `
+    <div class="field"><label>الجهة</label><select id="tContact">${options}</select></div>
+    <div class="field"><label>المبلغ (درهم)</label><input id="tAmount" type="number" step="0.01" value="${amountVal}" placeholder="0.00">
+      <div class="err" id="tAmountErr">الرجاء إدخال مبلغ أكبر من صفر</div></div>
+    <div class="field"><label>ملاحظة (اختياري)</label><textarea id="tNote" placeholder="تفاصيل المنتج أو السبب">${editing?escapeHtml(editing.note||''):''}</textarea></div>
+    ${type==='debt' ? `
+    <div class="field">
+      <div class="checkbox-row"><input type="checkbox" id="tHasDue" ${editing&&editing.dueDate?'checked':''} onchange="document.getElementById('tDueWrap').style.display=this.checked?'block':'none'"> تحديد تاريخ استحقاق للدين</div>
+      <div id="tDueWrap" style="display:${editing&&editing.dueDate?'block':'none'};margin-top:8px">
+        <input type="date" id="tDueDate" value="${editing&&editing.dueDate?editing.dueDate:''}">
+      </div>
+    </div>`:''}
+    <div class="field">
+      <label>صورة الفاتورة/البضاعة (اختياري)</label>
+      <div class="file-drop" onclick="document.getElementById('tImage').click()">📷 اضغط لالتقاط/رفع صورة</div>
+      <input type="file" id="tImage" accept="image/*" capture="environment" style="display:none" onchange="handleImageSelect(event)">
+      <img id="imgPreview" class="img-preview" style="display:${pendingImage?'block':'none'}" src="${pendingImage||''}">
+    </div>
+    <div class="sheet-actions">
+      <button class="btn-cancel" onclick="closeSheet()">إلغاء</button>
+      <button class="btn-save" onclick="saveTx('${type}','${editId||''}')">حفظ</button>
+    </div>`}`);
+}
+async function handleImageSelect(ev){
+  const file = ev.target.files[0]; if(!file) return;
+  try{
+    pendingImage = await compressImage(file);
+    const prev = document.getElementById('imgPreview');
+    prev.src = pendingImage; prev.style.display='block';
+  }catch(e){ alert('تعذر معالجة الصورة'); }
+}
+async function saveTx(type, editId){
+  const contactId = document.getElementById('tContact').value;
+  const amount = validateAmount(document.getElementById('tAmount').value);
+  if(!contactId){ alert('الرجاء اختيار جهة'); return; }
+  if(!amount){ document.getElementById('tAmountErr').style.display='block'; return; }
+  const note = document.getElementById('tNote').value.trim();
+  let dueDate = null;
+  const dueEl = document.getElementById('tDueDate');
+  const hasDueEl = document.getElementById('tHasDue');
+  if(hasDueEl && hasDueEl.checked && dueEl.value) dueDate = dueEl.value;
+
+  if(editId){
+    const t = state.transactions.find(x=>x.id===editId);
+    Object.assign(t, { contactId, amount, note, dueDate, image: pendingImage });
+  } else {
+    state.transactions.push({ id: uid(), contactId, type, amount, note, dueDate, image: pendingImage, date: nowIso() });
+  }
+  pendingImage = null;
+  await save(); closeSheet(); render();
+}
+function editTx(id){
+  const t = state.transactions.find(x=>x.id===id);
+  openTxModal(t.type, t.contactId, id);
+}
+async function deleteTx(id){
+  if(!confirm('هل تريد حذف هذه المعاملة؟ سيُعاد احتساب الرصيد تلقائياً.')) return;
+  state.transactions = state.transactions.filter(t=>t.id!==id);
+  await save(); render();
+}
+
+/* ---------- Expense modal (add + edit) ---------- */
+function openExpenseModal(kind, editId){
+  const editing = editId? state.expenses.find(e=>e.id===editId) : null;
+  if(editing) kind = editing.kind;
+  showSheet(`
+    <h3>${editing?'تعديل ':''}${kind==='income'?'إضافة مدخول':'إضافة مصروف'}</h3>
+    <div class="field"><label>الفئة</label><input id="eCat" value="${editing?escapeHtml(editing.category):''}" placeholder="${kind==='income'?'مثال: مبيعات اليوم':'مثال: كراء، كهرباء، بضاعة'}">
+      <div class="err" id="eCatErr">الرجاء إدخال وصف للفئة</div></div>
+    <div class="field"><label>المبلغ (درهم)</label><input id="eAmount" type="number" step="0.01" value="${editing?editing.amount:''}" placeholder="0.00">
+      <div class="err" id="eAmountErr">الرجاء إدخال مبلغ أكبر من صفر</div></div>
+    <div class="sheet-actions">
+      <button class="btn-cancel" onclick="closeSheet()">إلغاء</button>
+      <button class="btn-save" onclick="saveExpense('${kind}','${editId||''}')">حفظ</button>
+    </div>`);
+}
+async function saveExpense(kind, editId){
+  const category = validateName(document.getElementById('eCat').value) || document.getElementById('eCat').value.trim();
+  if(!category){ document.getElementById('eCatErr').style.display='block'; return; }
+  const amount = validateAmount(document.getElementById('eAmount').value);
+  if(!amount){ document.getElementById('eAmountErr').style.display='block'; return; }
+  if(editId){
+    const e = state.expenses.find(x=>x.id===editId);
+    Object.assign(e, { category, amount });
+  } else {
+    state.expenses.push({ id: uid(), kind, category, amount, date: todayStr(), time: new Date().toISOString() });
+  }
+  await save(); closeSheet(); render();
+}
+function editExpense(id){ const e = state.expenses.find(x=>x.id===id); openExpenseModal(e.kind, id); }
+async function deleteExpense(id){
+  if(!confirm('هل تريد حذف هذه الحركة؟')) return;
+  state.expenses = state.expenses.filter(e=>e.id!==id);
+  await save(); render();
+}
+
+/* ---------- PDF with date range ---------- */
+function openPdfRangeModal(contactId){
+  showSheet(`
+    <h3>استخراج كشف حساب</h3>
+    <div class="field"><label>الفترة</label>
+      <select id="pdfRange" onchange="document.getElementById('pdfCustom').style.display=this.value==='custom'?'block':'none'">
+        <option value="all">كل الفترة</option>
+        <option value="week">هذا الأسبوع</option>
+        <option value="month">هذا الشهر</option>
+        <option value="custom">فترة مخصصة</option>
+      </select>
+    </div>
+    <div id="pdfCustom" style="display:none">
+      <div class="field"><label>من تاريخ</label><input type="date" id="pdfFrom"></div>
+      <div class="field"><label>إلى تاريخ</label><input type="date" id="pdfTo"></div>
+    </div>
+    <div class="field"><label>نوع الطباعة</label>
+      <select id="pdfPrinter">
+        <option value="a4">ورقة عادية (A4 / PDF)</option>
+        <option value="thermal80">طابعة حرارية 80mm (تيكيت المحل)</option>
+        <option value="thermal58">طابعة حرارية 58mm (تيكيت صغير)</option>
+      </select>
+      <div class="hint">اختر الحرارية إذا كنت ستطبع من نفس طابعة الكاش المستعملة في المحل</div>
+    </div>
+    <div class="sheet-actions">
+      <button class="btn-cancel" onclick="closeSheet()">إلغاء</button>
+      <button class="btn-save" onclick="printStatement('${contactId}')">استخراج</button>
+    </div>`);
+}
+function printStatement(id){
+  const c = state.contacts.find(x=>x.id===id);
+  const range = document.getElementById('pdfRange').value;
+  const printer = document.getElementById('pdfPrinter').value;
+  let txs = state.transactions.filter(t=>t.contactId===id);
+  const today = new Date();
+  if(range==='week'){ txs = txs.filter(t=> daysBetween(t.date.slice(0,10), todayStr())>=0 && daysBetween(t.date.slice(0,10), todayStr())<7); }
+  else if(range==='month'){ txs = txs.filter(t=>{ const d=new Date(t.date); return d.getMonth()===today.getMonth() && d.getFullYear()===today.getFullYear(); }); }
+  else if(range==='custom'){
+    const from = document.getElementById('pdfFrom').value, to = document.getElementById('pdfTo').value;
+    if(from) txs = txs.filter(t=> t.date.slice(0,10) >= from);
+    if(to) txs = txs.filter(t=> t.date.slice(0,10) <= to);
+  }
+  txs.sort((a,b)=>new Date(a.date)-new Date(b.date));
+  const balanceInRange = txs.reduce((s,t)=> s + (t.type==='debt'?t.amount:-t.amount), 0);
+  const shopName = state.settings.shopName || 'كناش';
+  const rangeLabel = range==='all'?'كل الفترة':range==='week'?'هذا الأسبوع':range==='month'?'هذا الشهر':'فترة مخصصة';
+
+  const win = window.open('', '_blank');
+  if(printer === 'a4'){
+    win.document.write(buildA4Statement(c, txs, balanceInRange, shopName, rangeLabel));
+  } else {
+    const widthMm = printer==='thermal80' ? 80 : 58;
+    win.document.write(buildThermalStatement(c, txs, balanceInRange, shopName, rangeLabel, widthMm));
+  }
+  win.document.close(); win.focus();
+  setTimeout(()=>win.print(), 300);
+  closeSheet();
+}
+
+function buildA4Statement(c, txs, balanceInRange, shopName, rangeLabel){
+  return `
+    <html dir="rtl" lang="ar"><head><meta charset="utf-8"><title>كشف حساب - ${escapeHtml(c.name)}</title>
+    <style>
+      body{font-family:Tajawal,sans-serif;padding:30px;color:#2B2118;}
+      h1{font-size:20px;border-bottom:2px solid #173F31;padding-bottom:10px;}
+      table{width:100%;border-collapse:collapse;margin-top:16px;}
+      th,td{border:1px solid #ccc;padding:8px;text-align:right;font-size:13px;}
+      th{background:#F3E9D2;}
+      .total{margin-top:16px;font-weight:bold;font-size:15px;}
+    </style></head><body>
+    <h1>${escapeHtml(shopName)} — كشف حساب: ${escapeHtml(c.name)} ${c.phone? '('+escapeHtml(c.phone)+')':''}</h1>
+    <p>تاريخ الإصدار: ${new Date().toLocaleDateString('ar-MA')} | الفترة: ${rangeLabel}</p>
+    <table><thead><tr><th>التاريخ</th><th>النوع</th><th>المبلغ</th><th>ملاحظة</th></tr></thead><tbody>
+    ${txs.map(t=>`<tr><td>${new Date(t.date).toLocaleDateString('ar-MA')}</td><td>${t.type==='debt'?'دين':'تسديد'}</td><td>${fmt(t.amount)}</td><td>${escapeHtml(t.note||'')}</td></tr>`).join('')}
+    </tbody></table>
+    <div class="total">صافي حركة الفترة: ${fmt(Math.abs(balanceInRange))} درهم ${balanceInRange>0?'(دين)':(balanceInRange<0?'(تسديد زائد)':'(متعادل)')}</div>
+    </body></html>`;
+}
+
+// تنسيق مخصص للطابعات الحرارية: عرض ثابت بالمليمتر، خط أحادي المسافة، بدون جداول أو ألوان
+function buildThermalStatement(c, txs, balanceInRange, shopName, rangeLabel, widthMm){
+  const fontBase = widthMm===58 ? 10.5 : 12;
+  const rows = txs.map(t=>{
+    const d = new Date(t.date).toLocaleDateString('ar-MA');
+    const label = t.type==='debt' ? 'دين' : 'تسديد';
+    const sign = t.type==='debt' ? '+' : '-';
+    return `<div class="row"><span>${d} - ${label}</span><span class="bold">${sign}${fmt(t.amount)}</span></div>
+            ${t.note? `<div class="note">${escapeHtml(t.note)}</div>`:''}`;
+  }).join('<div class="dash"></div>');
+  return `
+    <html dir="rtl" lang="ar"><head><meta charset="utf-8"><title>تيكيت - ${escapeHtml(c.name)}</title>
+    <style>
+      @page{ size: ${widthMm}mm auto; margin:0; }
+      *{box-sizing:border-box;}
+      body{ width:${widthMm}mm; margin:0 auto; padding:8px 6px; font-family:'Courier New',monospace;
+            font-size:${fontBase}px; color:#000; }
+      .center{ text-align:center; }
+      .big{ font-size:${fontBase+3}px; font-weight:bold; }
+      .dash{ border-top:1px dashed #000; margin:5px 0; }
+      .solid{ border-top:1px solid #000; margin:6px 0; }
+      .row{ display:flex; justify-content:space-between; gap:6px; font-size:${fontBase}px; }
+      .note{ font-size:${fontBase-1.5}px; color:#333; margin:1px 0 3px; }
+      .bold{ font-weight:bold; }
+      .total-row{ display:flex; justify-content:space-between; font-size:${fontBase+2}px; font-weight:bold; margin-top:6px; }
+      .foot{ text-align:center; font-size:${fontBase-1}px; margin-top:10px; }
+    </style></head><body>
+      <div class="center big">${escapeHtml(shopName)}</div>
+      <div class="center">كشف حساب</div>
+      <div class="dash"></div>
+      <div class="row"><span>الزبون:</span><span class="bold">${escapeHtml(c.name)}</span></div>
+      ${c.phone? `<div class="row"><span>الهاتف:</span><span>${escapeHtml(c.phone)}</span></div>`:''}
+      <div class="row"><span>التاريخ:</span><span>${new Date().toLocaleDateString('ar-MA')}</span></div>
+      <div class="row"><span>الفترة:</span><span>${rangeLabel}</span></div>
+      <div class="solid"></div>
+      ${rows || '<div class="center">لا توجد معاملات في هذه الفترة</div>'}
+      <div class="solid"></div>
+      <div class="total-row"><span>الصافي:</span><span>${fmt(Math.abs(balanceInRange))} درهم</span></div>
+      <div class="center" style="font-size:${fontBase-1}px">${balanceInRange>0?'(مبلغ مستحق)':(balanceInRange<0?'(رصيد زائد)':'(الحساب متعادل)')}</div>
+      <div class="foot">شكراً لتعاملكم معنا 🌿</div>
+    </body></html>`;
+}
+
+/* ---------- WhatsApp ---------- */
+function sendWhatsapp(id){
+  const c = state.contacts.find(x=>x.id===id);
+  const b = contactBalance(id);
+  const phone = normalizePhone(c.phone);
+  if(!phone){ alert('رقم الهاتف غير صالح أو غير مسجل لهذه الجهة.'); return; }
+  let msg = `السلام عليكم ${c.name}،\n`;
+  if(b>0){
+    const nd = nearestDueDate(id);
+    if(nd){
+      msg += buildDueWording(daysBetween(todayStr(), nd), nd, b, c.name, true);
+    } else {
+      msg += `تذكير بخصوص رصيدكم المستحق: ${fmt(b)} درهم.\nنرجو التسديد في أقرب وقت ممكن، شكراً.`;
+    }
+  }
+  else if(b<0) msg += `لديكم رصيد زائد بقيمة ${fmt(-b)} درهم في حسابكم معنا.`;
+  else msg += `حسابكم معنا مسدد بالكامل، شكراً على تعاملكم.`;
+  window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank');
+}
+
+// أقرب تاريخ استحقاق غير مسدد لهذه الجهة (يُستخدم في الرسالة العامة عند عدم تحديد دين بعينه)
+function nearestDueDate(contactId){
+  const list = state.transactions.filter(t=> t.contactId===contactId && t.type==='debt' && t.dueDate);
+  if(!list.length) return null;
+  list.sort((a,b)=> new Date(a.dueDate)-new Date(b.dueDate));
+  return list[0].dueDate;
+}
+
+// صياغة نص التذكير حسب عدد الأيام المتبقية على الاستحقاق:
+// متأخر/اليوم -> نرجو التسديد في أقرب وقت ممكن | غداً -> نرجو التسديد غداً | لا يزال هناك وقت -> صياغة غير مستعجلة
+function buildDueWording(daysLeft, dueDateStr, amount, name, skipGreeting){
+  let when;
+  if(daysLeft < 0) when = `تجاوز موعد استحقاق دينكم المحدد بتاريخ ${dueDateStr}`;
+  else if(daysLeft === 0) when = `اليوم هو الموعد المحدد لتسديد دينكم`;
+  else if(daysLeft === 1) when = `غداً هو الموعد المحدد لتسديد دينكم`;
+  else when = `يقترب موعد استحقاق دينكم بتاريخ ${dueDateStr} (بعد ${daysLeft} يوماً)`;
+
+  let action;
+  if(daysLeft <= 0) action = 'نرجو التسديد في أقرب وقت ممكن، شكراً لتفهمكم.';
+  else if(daysLeft === 1) action = 'نرجو التسديد غداً، شكراً لتفهمكم.';
+  else action = 'لا يزال هناك متسع من الوقت للتسديد، نشكركم على تعاونكم ونذكركم بالموعد فقط.';
+
+  return `${when}.\nالمبلغ: ${fmt(amount)} درهم.\n${action}`;
+}
+
+// تذكير خاص بدين محدد (من نافذة/تبويب التذكيرات) - يعتمد على مبلغ وتاريخ هذا الدين نفسه
+// بدل الرصيد الإجمالي، لتفادي عرض رسالة غير صحيحة عندما يكون الرصيد الكلي صفراً لأسباب أخرى
+function sendDueReminder(contactId, txId){
+  const c = state.contacts.find(x=>x.id===contactId);
+  const t = state.transactions.find(x=>x.id===txId);
+  if(!c || !t){ alert('تعذر العثور على بيانات هذا التذكير.'); return; }
+  const phone = normalizePhone(c.phone);
+  if(!phone){ alert('رقم الهاتف غير صالح أو غير مسجل لهذه الجهة.'); return; }
+  const diff = daysBetween(todayStr(), t.dueDate);
+  const msg = `السلام عليكم ${c.name}،\n` + buildDueWording(diff, t.dueDate, t.amount, c.name);
+  window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank');
+}
+
+// تسديد سريع من شاشة التذكيرات: يفتح نموذج "تسديد" جاهزاً بنفس مبلغ الدين المستحق
+function quickSettle(contactId, amount){
+  closeSheet();
+  setTimeout(()=> openTxModal('pay', contactId, null, amount), 150);
+}
+
+/* ---------- Cloud Sync (Firebase Auth + Firestore) ---------- */
+function openSettingsModal(){
+  const s = state.settings;
+  showSheet(`
+    <h3>الإعدادات والمزامنة السحابية</h3>
+    <div class="field"><label>اسم المحل (يظهر في رأس كشوفات الحساب)</label>
+      <input id="shopNameInput" value="${escapeHtml(s.shopName)}" placeholder="مثال: محل بركة">
+    </div>
+    <div class="field"><label>التذكير التلقائي قبل الاستحقاق بعدد أيام</label>
+      <input id="leadDaysInput" type="number" min="0" max="14" value="${s.reminderLeadDays!=null?s.reminderLeadDays:1}">
+      <div class="hint">مثال: 1 = ستظهر لك نافذة تذكير فورية عند فتح التطبيق قبل يوم من موعد استحقاق أي دين</div>
+    </div>
+    <div class="sheet-actions" style="margin-bottom:16px">
+      <button class="btn-save" style="flex:none;padding:9px 18px" onclick="saveShopName()">حفظ</button>
+    </div>
+    <p style="font-size:12.5px;color:var(--ink-soft);margin-top:-8px">
+      بياناتك محفوظة حالياً على هذا الجهاز فقط (${STORAGE_MODE==='local'?'حفظ دائم في هذا المتصفح':STORAGE_MODE==='claude'?'حفظ داخل بيئة Claude':'الجلسة الحالية فقط، بدون حفظ دائم'}).
+      سجّل دخولك بالأسفل لتفعيل المزامنة بين أجهزتك (سيتصل تلقائياً بنفس حساب المحل السحابي، لا حاجة لأي إعدادات تقنية).
+    </p>
+
+    <div class="field"><label style="color:var(--cover-dark)">التسجيل بالبريد الإلكتروني</label></div>
+    <div class="field"><label>البريد الإلكتروني</label><input id="sEmail" value="${escapeHtml(s.userEmail)}" type="email"></div>
+    <div class="field"><label>كلمة المرور</label><input id="sPass" type="password"></div>
+    <div class="sheet-actions">
+      <button class="btn-cancel" onclick="fbSignUp()">إنشاء حساب</button>
+      <button class="btn-save" onclick="fbSignIn()">تسجيل الدخول</button>
+    </div>
+
+    <p style="font-size:11px;color:var(--ink-soft);margin-top:10px">
+      ${s.fbLoggedIn? '✅ متصل حالياً بحساب: '+escapeHtml(s.userEmail||'') : '⚠️ غير متصل بأي حساب سحابي بعد — سجّل حسابك أعلاه لتفعيل المزامنة'}
+    </p>
+
+    <div class="field" style="margin-top:14px">
+      <div class="checkbox-row"><input type="checkbox" id="autoBackupToggle" ${s.autoBackupEnabled!==false?'checked':''} onchange="toggleAutoBackup(this.checked)"> تفعيل النسخ الاحتياطي التلقائي</div>
+      <div class="hint">يُنسخ تلقائياً بعد كل تعديل (خلال ثوانٍ)، وعلى الأقل مرة كل أسبوع حتى بدون تعديلات جديدة</div>
+      <div class="hint">آخر نسخة احتياطية سحابية: ${s.lastCloudBackup? new Date(s.lastCloudBackup).toLocaleString('ar-MA') : 'لم تُنفَّذ بعد'}</div>
+    </div>
+
+    <div class="sheet-actions" style="margin-top:10px">
+      <button class="btn-cancel" onclick="cloudPull()">⬇️ تنزيل من السحابة</button>
+      <button class="btn-save" onclick="cloudPush()">⬆️ رفع الآن يدوياً</button>
+    </div>
+    <div class="sheet-actions" style="margin-top:6px">
+      <button class="btn-cancel" onclick="closeSheet()">إغلاق</button>
+    </div>`);
+}
+async function saveShopName(){
+  state.settings.shopName = document.getElementById('shopNameInput').value.trim();
+  const lead = parseInt(document.getElementById('leadDaysInput').value);
+  state.settings.reminderLeadDays = Number.isFinite(lead) && lead>=0 ? lead : 1;
+  await save();
+  alert('تم حفظ الإعدادات.');
+}
+
+/* ---------- Firebase Auth: بريد إلكتروني ---------- */
+async function fbSignUp(){
+  const fb = initFirebaseIfConfigured();
+  if(!fb){ alert('تعذر الاتصال بخدمة Firebase. تأكد من اتصالك بالإنترنت وحاول مجدداً.'); return; }
+  const email = document.getElementById('sEmail').value.trim();
+  const password = document.getElementById('sPass').value;
+  if(!email || !password){ alert('الرجاء إدخال البريد الإلكتروني وكلمة المرور.'); return; }
+  try{
+    const cred = await fb.auth().createUserWithEmailAndPassword(email, password);
+    state.settings.fbLoggedIn = true; state.settings.userId = cred.user.uid; state.settings.userEmail = email;
+    await save();
+    alert('تم إنشاء الحساب بنجاح. يمكنك الآن رفع بياناتك للسحابة.');
+    openSettingsModal();
+  }catch(e){ alert('خطأ: '+translateFbError(e)); }
+}
+async function fbSignIn(){
+  const fb = initFirebaseIfConfigured();
+  if(!fb){ alert('تعذر الاتصال بخدمة Firebase. تأكد من اتصالك بالإنترنت وحاول مجدداً.'); return; }
+  const email = document.getElementById('sEmail').value.trim();
+  const password = document.getElementById('sPass').value;
+  if(!email || !password){ alert('الرجاء إدخال البريد الإلكتروني وكلمة المرور.'); return; }
+  try{
+    const cred = await fb.auth().signInWithEmailAndPassword(email, password);
+    state.settings.fbLoggedIn = true; state.settings.userId = cred.user.uid; state.settings.userEmail = email;
+    await save();
+    alert('تم تسجيل الدخول بنجاح.');
+    openSettingsModal();
+  }catch(e){ alert('خطأ: '+translateFbError(e)); }
+}
+function translateFbError(e){
+  const code = e && e.code || '';
+  const map = {
+    'auth/email-already-in-use':'هذا البريد الإلكتروني مسجّل مسبقاً.',
+    'auth/invalid-email':'صيغة البريد الإلكتروني غير صحيحة.',
+    'auth/weak-password':'كلمة المرور ضعيفة جداً (6 أحرف على الأقل).',
+    'auth/wrong-password':'كلمة المرور غير صحيحة.',
+    'auth/user-not-found':'لا يوجد حساب بهذا البريد الإلكتروني.',
+    'auth/invalid-phone-number':'رقم الهاتف غير صالح.',
+    'auth/invalid-verification-code':'رمز التحقق غير صحيح.',
+    'auth/too-many-requests':'محاولات كثيرة جداً، حاول لاحقاً.'
+  };
+  return map[code] || (e && e.message) || 'حدث خطأ غير متوقع.';
+}
+async function toggleAutoBackup(checked){
+  state.settings.autoBackupEnabled = checked;
+  await save();
+}
+
+/* ---------- رفع/تنزيل يدوي من Firestore ---------- */
+async function cloudPush(){
+  const fb = initFirebaseIfConfigured();
+  const user = fb && fb.auth().currentUser;
+  if(!fb || !user){ alert('الرجاء تسجيل الدخول أولاً.'); return; }
+  try{
+    await fb.firestore().collection('kannash_data').doc(user.uid).set({
+      data: JSON.stringify({contacts:state.contacts,transactions:state.transactions,expenses:state.expenses}),
+      updatedAt: fb.firestore.FieldValue.serverTimestamp()
+    });
+    state.settings.lastCloudBackup = nowIso();
+    try{ await storageSet(STORAGE_KEY, JSON.stringify(state)); }catch(e){}
+    alert('تم رفع البيانات للسحابة بنجاح.');
+  }catch(e){ alert('فشل الرفع. تأكد من إعداد قواعد أمان Firestore (راجع تعليمات README).\n'+translateFbError(e)); }
+}
+async function cloudPull(){
+  const fb = initFirebaseIfConfigured();
+  const user = fb && fb.auth().currentUser;
+  if(!fb || !user){ alert('الرجاء تسجيل الدخول أولاً.'); return; }
+  try{
+    const doc = await fb.firestore().collection('kannash_data').doc(user.uid).get();
+    if(!doc.exists){ alert('لا توجد بيانات محفوظة في السحابة بعد.'); return; }
+    const remote = JSON.parse(doc.data().data);
+    state.contacts = remote.contacts||[]; state.transactions = remote.transactions||[]; state.expenses = remote.expenses||[];
+    await save(); closeSheet(); render();
+    alert('تم تنزيل البيانات من السحابة بنجاح.');
+  }catch(e){ alert('فشل التنزيل.\n'+translateFbError(e)); }
+}
+
+load();
+</script>
+</body>
+</html>
